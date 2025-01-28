@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Leverage Trading Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Previous CSS remains the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #6c5ce7;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .input-group:hover {
+            transform: translateY(-2px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #a0a0a0;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        .results {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .result-label {
+            color: #a0a0a0;
+        }
+
+        .risk-low {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        .profit {
+            color: #00ff88;
+            font-size: 1.2em;
+        }
+
+        .loss {
+            color: #ff4444;
+            font-size: 1.2em;
+        }
+
+        .ratio {
+            color: #ffb300;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: #6c5ce7;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            background: #5b4ad6;
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CRYPTO LEVERAGE CALCULATOR</h1>
+        
+        <div class="calculator-grid">
+            <div class="input-group">
+                <label>Entry Price (USD)</label>
+                <input type="number" id="entryPrice" value="100000">
+            </div>
+            
+            <div class="input-group">
+                <label>Leverage</label>
+                <select id="leverage">
+                    <option value="2">2x</option>
+                    <option value="5">5x</option>
+                    <option value="10">10x</option>
+                    <option value="25">25x</option>
+                    <option value="50">50x</option>
+                    <option value="100">100x</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Portfolio Size (USD)</label>
+                <input type="number" id="portfolioSize" value="1000000">
+            </div>
+            
+            <div class="input-group">
+                <label>Stop Loss (USD)</label>
+                <input type="number" id="stopLoss" value="98000">
+            </div>
+            
+            <div class="input-group">
+                <label>Take Profit (USD)</label>
+                <input type="number" id="takeProfit" value="105000">
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">CALCULATE</button>
+
+        <div class="results">
+            <div class="result-item">
+                <span class="result-label">Position Size</span>
+                <span id="positionSize" class="profit">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Risk Level</span>
+                <span id="riskLevel" class="risk-low">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">R:R Ratio</span>
+                <span id="rrRatio" class="ratio">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Potential Profit</span>
+                <span id="potentialProfit" class="profit">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Potential Loss</span>
+                <span id="potentialLoss" class="loss">-</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // Get input values
+            const entry = parseFloat(document.getElementById('entryPrice').value);
+            const leverage = parseFloat(document.getElementById('leverage').value);
+            const portfolio = parseFloat(document.getElementById('portfolioSize').value);
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+            const takeProfit = parseFloat(document.getElementById('takeProfit').value);
+
+            // Calculate position size
+            const positionSize = portfolio * leverage;
+            
+            // Calculate price differences
+            const priceDiffProfit = takeProfit - entry;
+            const priceDiffLoss = entry - stopLoss;
+            
+            // Calculate profit/loss percentages
+            const profitPercentage = (priceDiffProfit / entry) * 100;
+            const lossPercentage = (priceDiffLoss / entry) * 100;
+            
+            // Calculate actual profit/loss amounts
+            const profit = (positionSize * profitPercentage) / 100;
+            const loss = (positionSize * lossPercentage) / 100;
+            
+            // Calculate risk:reward ratio
+            const rrRatio = (profit / loss).toFixed(2);
+            
+            // Calculate risk level
+            const portfolioRisk = (loss / portfolio * 100).toFixed(2);
+            let riskLevel = '';
+            if(portfolioRisk < 2) riskLevel = 'VERY LOW';
+            else if(portfolioRisk < 5) riskLevel = 'LOW';
+            else if(portfolioRisk < 10) riskLevel = 'MEDIUM';
+            else if(portfolioRisk < 20) riskLevel = 'HIGH';
+            else riskLevel = 'VERY HIGH';
+
+            // Update results
+            document.getElementById('positionSize').textContent = `$${positionSize.toLocaleString()}`;
+            document.getElementById('riskLevel').textContent = `${riskLevel} (${portfolioRisk}%)`;
+            document.getElementById('rrRatio').textContent = `${rrRatio}:1`;
+            document.getElementById('potentialProfit').textContent = 
+                `$${profit.toLocaleString(undefined, {maximumFractionDigits: 2})} / ${profitPercentage.toFixed(2)}%`;
+            document.getElementById('potentialLoss').textContent = 
+                `$${loss.toLocaleString(undefined, {maximumFractionDigits: 2})} / ${portfolioRisk}%`;
+        }
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
