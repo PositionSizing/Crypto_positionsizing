@@ -6,7 +6,6 @@
     <title>Crypto Leverage Trading Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Previous CSS remains the same */
         * {
             margin: 0;
             padding: 0;
@@ -66,7 +65,7 @@
             font-weight: 500;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 12px;
             background: transparent;
@@ -77,7 +76,7 @@
             transition: border-color 0.3s ease;
         }
 
-        input:focus, select:focus {
+        input:focus {
             outline: none;
             border-color: #6c5ce7;
         }
@@ -137,6 +136,13 @@
             background: #5b4ad6;
         }
 
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .calculator-grid {
                 grid-template-columns: 1fr;
@@ -155,15 +161,9 @@
             </div>
             
             <div class="input-group">
-                <label>Leverage</label>
-                <select id="leverage">
-                    <option value="2">2x</option>
-                    <option value="5">5x</option>
-                    <option value="10">10x</option>
-                    <option value="25">25x</option>
-                    <option value="50">50x</option>
-                    <option value="100">100x</option>
-                </select>
+                <label>Leverage (2-100x)</label>
+                <input type="number" id="leverage" value="2" min="2" max="100" step="0.1">
+                <div id="leverageError" class="error-message">Please enter a value between 2 and 100</div>
             </div>
             
             <div class="input-group">
@@ -213,7 +213,23 @@
     </div>
 
     <script>
+        function validateLeverage() {
+            const leverageInput = document.getElementById('leverage');
+            const leverageError = document.getElementById('leverageError');
+            const value = parseFloat(leverageInput.value);
+            
+            if (value < 2 || value > 100 || isNaN(value)) {
+                leverageError.style.display = 'block';
+                return false;
+            }
+            
+            leverageError.style.display = 'none';
+            return true;
+        }
+
         function calculate() {
+            if (!validateLeverage()) return;
+
             // Get input values
             const entry = parseFloat(document.getElementById('entryPrice').value);
             const leverage = parseFloat(document.getElementById('leverage').value);
@@ -257,6 +273,9 @@
             document.getElementById('potentialLoss').textContent = 
                 `$${loss.toLocaleString(undefined, {maximumFractionDigits: 2})} / ${portfolioRisk}%`;
         }
+
+        // Add event listener for leverage input validation
+        document.getElementById('leverage').addEventListener('input', validateLeverage);
 
         // Initial calculation
         calculate();
